@@ -1,0 +1,14 @@
+[[permission]]
+identifier = "allow-close-app"
+description = "Allows closing the application"
+commands.allow = ["close_app"]
+
+[[permission]]
+identifier = "allow-toggle-maximize"
+description = "Allows toggling window maximize state"
+commands.allow = ["toggle_maximize"]
+
+[[permission]]
+identifier = "allow-set-always-on-top"
+description = "Allows toggling always-on-top"
+commands.allow = ["set_always_on_top"]

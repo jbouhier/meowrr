@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MeowRR</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!-- Widget view -->
+    <div id="widget-view" class="view" data-tauri-drag-region>
+
+      <div class="titlebar" data-tauri-drag-region>
+        <div class="titlebar-space" data-tauri-drag-region></div>
+        <button class="btn-icon" id="pin-btn" data-tip="Keep on top [T]">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"/>
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="maximize-btn" data-tip="Fullscreen [F]">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+        <button class="btn-icon btn-close" id="close-btn" data-tip="Close">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Shortcuts overlay — visible while Tab is held -->
+      <div id="shortcuts-overlay">
+        <div class="sk-grid">
+          <div class="sk-section">
+            <span class="sk-section-label">Data</span>
+            <div class="sk-list">
+              <span class="sk-item"><kbd>M</kbd><span>MRR</span></span>
+              <span class="sk-item"><kbd>Y</kbd><span>ARR</span></span>
+              <span class="sk-item"><kbd>A</kbd><span>All time</span></span>
+              <span class="sk-item"><span class="sk-keys"><kbd>←</kbd><kbd>→</kbd></span><span>Cycle</span></span>
+              <span class="sk-item"><kbd>C</kbd><span>Copy</span></span>
+            </div>
+          </div>
+          <div class="sk-section">
+            <span class="sk-section-label">Window</span>
+            <div class="sk-list">
+              <span class="sk-item"><kbd>F</kbd><span>Fullscreen</span></span>
+              <span class="sk-item"><kbd>T</kbd><span>Pin on top</span></span>
+              <span class="sk-item"><kbd>X</kbd><span>Toggle axis</span></span>
+            </div>
+          </div>
+          <div class="sk-section">
+            <span class="sk-section-label">App</span>
+            <div class="sk-list">
+              <span class="sk-item"><kbd>S</kbd><span>Settings</span></span>
+              <span class="sk-item"><kbd>Q</kbd><span>Quit</span></span>
+              <span class="sk-item"><kbd>Esc</kbd><span>Back</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error banner — shown when API key exists but Stripe unreachable -->
+      <div id="error-banner" class="error-banner hidden">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Can't reach Stripe — showing last known data</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat-header">
+          <div class="range-pills">
+            <button class="range-pill active" data-range="M">M</button>
+            <button class="range-pill" data-range="Y">Y</button>
+            <button class="range-pill" data-range="A">A</button>
+          </div>
+        </div>
+        <span class="stat-value" id="mrr">$42k</span>
+        <span class="stat-change" id="change">↑ +$4.3k · +11.3% this month</span>
+        <span class="stat-change change-short" id="change-short">+11.3%</span>
+      </div>
+
+      <!-- Settings button — bottom-right corner -->
+      <button class="btn-icon settings-corner" id="settings-btn" data-tip="Settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+
+      <div class="chart-wrap">
+        <div class="refresh-hint"><span id="refresh-text">Updated just now</span></div>
+        <div id="tab-hint" class="tab-hint">⇥ Tab for shortcuts</div>
+        <svg id="sparkline" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+          <g id="axis-group"></g>
+          <path id="spark-fill" fill="#6366f1" fill-opacity="0.07"/>
+          <path id="spark-line" fill="none" stroke="url(#line-grad)" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle id="spark-glow" fill="#c084fc" opacity="0.25"/>
+          <circle id="spark-dot" fill="#c084fc"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Copy toast -->
+    <div id="copy-toast" class="copy-toast hidden">Copied!</div>
+
+    <!-- Custom tooltip -->
+    <div id="tooltip"></div>
+
+    <!-- Settings view -->
+    <div id="settings-view" class="view hidden">
+      <div class="bar" data-tauri-drag-region>
+        <button class="btn-icon" id="back-btn" data-tip="Back [Esc]">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
+        <span class="bar-title">Settings</span>
+      </div>
+      <div class="settings-body">
+        <div class="field">
+          <label for="api-key">Stripe API Key</label>
+          <input type="password" id="api-key" placeholder="rk_live_..." autocomplete="off" spellcheck="false"/>
+          <p class="hint">Use a restricted, read-only key from your Stripe dashboard.</p>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Show axis</span>
+          <button class="toggle-btn" id="axis-toggle" role="switch" aria-checked="false">
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+        <button class="btn-save" id="save-btn">Save</button>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

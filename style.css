@@ -1,0 +1,540 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0c0c0f;
+  --text: #f0f0f4;
+  --muted: #44445a;
+  --border: #1c1c24;
+  --accent: #6366f1;
+  --green: #22c55e;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 10px;
+}
+
+
+/* ── Views ── */
+.view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Widget view ── */
+#widget-view {
+  position: relative;
+}
+
+/* ── Shortcuts overlay — Tab hold ── */
+#shortcuts-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: clamp(12px, 4vw, 40px);
+  background: rgba(12,12,15,0.9);
+  backdrop-filter: blur(6px);
+  border-radius: 10px;
+  pointer-events: none;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  opacity: 0;
+  transition: opacity .2s;
+}
+#shortcuts-overlay.visible { opacity: 1; pointer-events: auto; }
+#shortcuts-overlay::-webkit-scrollbar { width: 4px; }
+#shortcuts-overlay::-webkit-scrollbar-track { background: transparent; }
+#shortcuts-overlay::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+#shortcuts-overlay::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+.sk-grid {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: clamp(16px, 5vw, 56px);
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.sk-section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, min(1.5vw, 1.5vh), 10px);
+}
+
+.sk-section-label {
+  font-size: clamp(13px, min(3.5vw, 3vh), 20px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: clamp(2px, min(1vw, 1vh), 8px);
+}
+
+.sk-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: clamp(3px, min(1.2vw, 1.2vh), 8px);
+  column-gap: clamp(10px, min(3vw, 2.5vh), 24px);
+  align-items: center;
+}
+
+.sk-item {
+  display: contents;
+}
+
+.sk-item kbd {
+  font-family: inherit;
+  font-size: clamp(13px, min(3vw, 2.5vh), 18px);
+  font-weight: 700;
+  color: var(--text);
+  background: #18181f;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-bottom-width: 2px;
+  border-radius: clamp(3px, 0.8vw, 5px);
+  padding: clamp(1px, 0.4vh, 3px) clamp(5px, 1.2vw, 9px);
+  min-width: clamp(28px, 5vw, 38px);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.sk-item span {
+  font-size: clamp(14px, min(3.2vw, 2.8vh), 20px);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.sk-keys {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+/* Zone 1 — narrow + tall (≤719px, >260px): 1 column centered, fixed fonts, scrollable */
+@media (max-width: 719px) and (min-height: 261px) {
+  .sk-section { flex: 0 0 100%; align-items: center; }
+  .sk-list { grid-template-columns: auto auto; }
+  .sk-section-label { font-size: 16px; }
+  .sk-item kbd { font-size: 14px; min-width: 28px; }
+  .sk-item span { font-size: 15px; }
+}
+
+/* Zone 2 — narrow + short (≤719px, ≤260px): 2 columns centered, scrollable */
+@media (max-width: 719px) and (max-height: 260px) {
+  .sk-section { flex: 0 0 calc(50% - 10px); align-items: center; }
+  .sk-list { grid-template-columns: auto auto; }
+}
+
+/* Zone 3 — wide (≥720px, any height): 3 columns — handled by base styles */
+
+/* Tab hint pill — shown once on first launch */
+.tab-hint {
+  position: absolute;
+  bottom: clamp(18px, 5vh, 32px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  font-size: clamp(12px, min(4vw, 3.5vh), 22px);
+  padding: clamp(4px, 1.2vh, 10px) clamp(12px, 4vw, 24px);
+  border-radius: 100px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity .4s;
+}
+.tab-hint.show { opacity: 1; }
+
+/* ── Custom tooltip ── */
+#tooltip {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  background: rgba(22,22,30,0.97);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .12s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#tooltip.visible { opacity: 1; }
+#tooltip kbd {
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 1.6;
+}
+
+/* ── Titlebar — drag surface with maximize + close ── */
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: clamp(3px, 1vw, 8px) clamp(4px, 1.5vw, 10px);
+  flex-shrink: 0;
+}
+
+
+.titlebar-space {
+  flex: 1;
+  height: 100%;
+}
+
+/* ── Settings button — fixed bottom-right ── */
+.settings-corner {
+  position: absolute;
+  bottom: clamp(8px, 2.5vw, 16px);
+  right: clamp(8px, 2.5vw, 16px);
+  z-index: 10;
+}
+
+/* ── Pin button active state ── */
+.btn-icon.pinned {
+  color: var(--accent);
+}
+.btn-icon.pinned:hover {
+  color: var(--accent);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+/* ── Error banner ── */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px clamp(12px, 4vw, 28px);
+  font-size: clamp(9px, 2.5vw, 12px);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+  flex-shrink: 0;
+}
+
+/* ── Stats: anchored top-left, scales with window ── */
+.stats {
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(12px, 4vw, 28px) clamp(4px, 1vh, 10px);
+  flex-shrink: 0;
+}
+
+
+
+.stat-value {
+  font-size: clamp(32px, 16vw, 140px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.stat-change {
+  font-size: clamp(10px, min(3.2vw, 2.2vh), 18px);
+  font-weight: 500;
+  color: var(--green);
+  margin-top: clamp(3px, 1.2vh, 10px);
+}
+
+.change-short { display: none; }
+
+/* ── Responsive size classes ── */
+
+/* Default (220–360px): abbreviated change line */
+@media (min-height: 220px) and (max-height: 360px) {
+  .stat-change { display: none; }
+  .change-short { display: block; }
+}
+
+/* Small viewport (< 300px tall): kill all spacing, fill with MRR */
+@media (max-height: 300px) {
+  .titlebar { padding-top: 0; padding-bottom: 0; }
+  .stats { padding: 0 clamp(8px, 3vw, 16px); }
+  .stat-header { margin-bottom: 0; }
+  .stat-label { margin-bottom: 0; }
+  .stat-change, .change-short { margin-top: 1px; }
+  .stat-value { font-size: clamp(32px, max(18vw, 28vh), 130px); }
+}
+
+/* Compact (< 220px): number only, centered */
+@media (max-height: 219px) {
+  .titlebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    opacity: 0;
+    padding: 8px 10px;
+    transition: opacity .2s .3s;
+  }
+  #widget-view:hover .titlebar {
+    opacity: 1;
+    transition: opacity .2s;
+  }
+  .chart-wrap { display: none; }
+  .error-banner { display: none; }
+  .stat-header { display: none; }
+  .stat-change { display: none; }
+  .change-short { display: none; }
+  #settings-btn { display: none; }
+  .stats {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+}
+
+/* ── Maximized / fullscreen overrides ── */
+#widget-view.maximized .titlebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity .2s .3s;
+}
+#widget-view.maximized:hover .titlebar {
+  opacity: 1;
+  transition: opacity .2s;
+}
+
+#widget-view.maximized .stats {
+  flex-shrink: 0;
+  justify-content: flex-start;
+  padding: clamp(8px, 4vh, 48px) min(6vw, 60px) clamp(4px, 2vh, 24px);
+}
+
+
+#widget-view.maximized .stat-value {
+  font-size: clamp(48px, 12vmin, 160px);
+}
+
+#widget-view.maximized .stat-change {
+  font-size: clamp(12px, 2.2vmin, 26px);
+  margin-top: clamp(6px, 1.5vh, 16px);
+}
+
+/* ── Sparkline fill — hidden, line only ── */
+#spark-fill { display: none; }
+
+/* ── Chart: fills all remaining space ── */
+.chart-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-wrap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Refresh hint — appears on chart hover */
+.refresh-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  z-index: 2;
+}
+.chart-wrap:hover .refresh-hint { opacity: 1; }
+
+/* Copy toast */
+.copy-toast {
+  position: fixed;
+  bottom: clamp(18px, 5vh, 32px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  font-size: clamp(12px, min(4vw, 3.5vh), 22px);
+  font-weight: 500;
+  padding: clamp(4px, 1.2vh, 10px) clamp(12px, 4vw, 24px);
+  border-radius: 100px;
+  pointer-events: none;
+  z-index: 100;
+  transition: opacity .3s;
+}
+.copy-toast.hidden { opacity: 0; }
+
+/* ── Axis toggle ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-label {
+  font-size: clamp(12px, 3.2vw, 28px);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.toggle-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.6em;
+  height: 1.5em;
+  border-radius: 100px;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: clamp(12px, 3.2vw, 28px); /* inherit scale from parent */
+  transition: background .2s;
+}
+
+.toggle-btn[aria-checked="true"] { background: var(--accent); }
+
+.toggle-thumb {
+  position: absolute;
+  top: 0.15em;
+  bottom: 0.15em;
+  left: 0.15em;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  transition: left .2s;
+}
+
+.toggle-btn[aria-checked="true"] .toggle-thumb {
+  left: calc(100% - 0.15em);
+  transform: translateX(-100%);
+}
+
+/* ── Settings bar ── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(6px, 2.5vw, 16px);
+  flex-shrink: 0;
+}
+
+
+.bar-title {
+  font-size: clamp(10px, 2.8vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Shared: icon buttons ── */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(24px, 6vw, 44px);
+  height: clamp(24px, 6vw, 44px);
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .12s, background .12s;
+}
+.btn-icon:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.btn-close:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+/* ── Settings body ── */
+.settings-body {
+  flex: 1;
+  padding: clamp(12px, 4.5vh, 42px) clamp(12px, 5vw, 48px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 3vh, 28px);
+}
+
+.field { display: flex; flex-direction: column; gap: clamp(5px, 1.2vh, 12px); }
+
+.field label {
+  font-size: clamp(9px, 2.8vw, 22px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: clamp(5px, 1.5vw, 10px);
+  color: var(--text);
+  font-family: inherit;
+  font-size: clamp(12px, 3.2vw, 28px);
+  padding: clamp(7px, 2vh, 18px) clamp(8px, 2.5vw, 20px);
+  outline: none;
+  cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
+  transition: border-color .15s;
+}
+.field input::placeholder { color: var(--muted); }
+.field input:focus { border-color: var(--accent); }
+
+.hint {
+  font-size: clamp(10px, 2.8vw, 20px);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.btn-save {
+  align-self: flex-end;
+  background: var(--accent);
+  border: none;
+  border-radius: clamp(5px, 1.5vw, 10px);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: clamp(12px, 3.2vw, 28px);
+  font-weight: 500;
+  padding: clamp(7px, 2vh, 18px) clamp(14px, 4.5vw, 40px);
+  transition: opacity .15s;
+}
+.btn-save:hover { opacity: 0.85; }
