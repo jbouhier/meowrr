@@ -22,7 +22,7 @@
         "minHeight": 180,
         "resizable": true,
         "decorations": false,
-        "transparent": true,
+        "transparent": false,
         "backgroundColor": "#0c0c0f",
         "acceptFirstMouse": true
       }
@@ -32,6 +32,17 @@
     }
   },
   "bundle": {
-    "active": false
+    "active": true,
+    "targets": ["dmg", "app", "nsis", "appimage", "deb"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Productivity",
+    "shortDescription": "Stripe MRR at a glance",
+    "longDescription": "MeowRR is a tiny always-on-top widget that keeps your Stripe MRR and ARR visible on your desktop."
   }
 }

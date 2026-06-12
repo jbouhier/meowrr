@@ -8,9 +8,9 @@
   </head>
   <body>
     <!-- Widget view -->
-    <div id="widget-view" class="view" data-tauri-drag-region>
+    <div id="widget-view" class="view">
 
-      <div class="titlebar" data-tauri-drag-region>
+      <div class="titlebar">
         <div class="titlebar-space" data-tauri-drag-region></div>
         <button class="btn-icon" id="pin-btn" data-tip="Keep on top [T]">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -72,17 +72,15 @@
         <span>Can't reach Stripe — showing last known data</span>
       </div>
 
-      <div class="stats">
-        <div class="stat-header">
-          <div class="range-pills">
-            <button class="range-pill active" data-range="M">M</button>
-            <button class="range-pill" data-range="Y">Y</button>
-            <button class="range-pill" data-range="A">A</button>
-          </div>
-        </div>
+      <div class="stats" data-tauri-drag-region>
         <span class="stat-value" id="mrr">$42k</span>
         <span class="stat-change" id="change">↑ +$4.3k · +11.3% this month</span>
         <span class="stat-change change-short" id="change-short">+11.3%</span>
+        <div class="range-pills">
+          <button class="range-pill active" data-range="M">M</button>
+          <button class="range-pill" data-range="Y">Y</button>
+          <button class="range-pill" data-range="A">A</button>
+        </div>
       </div>
 
       <!-- Settings button — bottom-right corner -->
@@ -93,7 +91,7 @@
         </svg>
       </button>
 
-      <div class="chart-wrap">
+      <div class="chart-wrap" data-tauri-drag-region>
         <div class="refresh-hint"><span id="refresh-text">Updated just now</span></div>
         <div id="tab-hint" class="tab-hint">⇥ Tab for shortcuts</div>
         <svg id="sparkline" xmlns="http://www.w3.org/2000/svg">

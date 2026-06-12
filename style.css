@@ -20,7 +20,6 @@ html, body {
 body {
   background: var(--bg);
   color: var(--text);
-  border-radius: 10px;
 }
 
 
@@ -264,13 +263,56 @@ body {
 }
 
 .stat-change {
-  font-size: clamp(10px, min(3.2vw, 2.2vh), 18px);
-  font-weight: 500;
+  font-size: clamp(14px, 4.5vw, 22px);
+  font-weight: 600;
   color: var(--green);
-  margin-top: clamp(3px, 1.2vh, 10px);
+  margin-top: clamp(6px, 1.8vh, 14px);
 }
 
 .change-short { display: none; }
+
+/* ── Range switcher (M / Y / A) ── */
+.range-pills {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1.5vw, 8px);
+  margin-top: clamp(10px, 2vh, 18px);
+  flex-shrink: 0;
+}
+
+.range-pill {
+  position: relative;
+  background: none;
+  border: none;
+  padding: clamp(4px, 1vh, 8px) clamp(6px, 1.5vw, 10px);
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color .12s;
+}
+
+.range-pill::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%) scale(0);
+  transition: transform .15s ease-out;
+}
+
+.range-pill:hover { color: var(--text); }
+.range-pill.active { color: var(--accent); }
+.range-pill.active::after { transform: translateX(-50%) scale(1); }
 
 /* ── Responsive size classes ── */
 
@@ -284,7 +326,6 @@ body {
 @media (max-height: 300px) {
   .titlebar { padding-top: 0; padding-bottom: 0; }
   .stats { padding: 0 clamp(8px, 3vw, 16px); }
-  .stat-header { margin-bottom: 0; }
   .stat-label { margin-bottom: 0; }
   .stat-change, .change-short { margin-top: 1px; }
   .stat-value { font-size: clamp(32px, max(18vw, 28vh), 130px); }
@@ -308,7 +349,7 @@ body {
   }
   .chart-wrap { display: none; }
   .error-banner { display: none; }
-  .stat-header { display: none; }
+  .range-pills { display: none; }
   .stat-change { display: none; }
   .change-short { display: none; }
   #settings-btn { display: none; }

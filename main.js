@@ -45,6 +45,10 @@ function fmt(n, currency = false) {
 let currentRange = localStorage.getItem("meowrr_range") || "M";
 
 function setRange(r) {
+  document.querySelectorAll(".range-pill").forEach(b => {
+    b.classList.toggle("active", b.dataset.range === r);
+  });
+  if (r === currentRange) return;
   currentRange = r;
   localStorage.setItem("meowrr_range", r);
   const d = RANGES[r];
@@ -58,6 +62,10 @@ function setRange(r) {
 
   drawSparkline(d.data, d.xLabels, true);
 }
+
+document.querySelectorAll(".range-pill").forEach(btn => {
+  btn.addEventListener("click", () => setRange(btn.dataset.range));
+});
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
 
@@ -125,7 +133,7 @@ function drawSparkline(data, xLabels, animate = false) {
 
   const axisGroup = document.getElementById("axis-group");
   axisGroup.innerHTML = "";
-  if (showAxis) drawAxis(axisGroup, pts, data, W, H, xLeft, yTop, yBot, xLabels);
+  if (showAxis) drawAxis(axisGroup, pts, data, W, H, xPad, yTop, yBot, xLabels);
 
   if (animate) animateSparkline();
 }
