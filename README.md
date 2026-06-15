@@ -1,6 +1,8 @@
 # MeowRR
 
-Keep an eye on your MRR
+Desktop MMR tracker
+
+Built with Tauri v2, TypeScript, Vite, and Bun.
 
 ## Prerequisites
 
@@ -29,6 +31,15 @@ bun tauri build
 ```
 
 Outputs to `src-tauri/target/release/bundle/`:
+
 - macOS → `.dmg`
 - Windows → `.exe` / `.msi`
 - Linux → `.AppImage` / `.deb`
+
+## Checks
+
+```bash
+bun run check   # type-check + lint
+bun run format  # format everything
+bun test        # run tests
+```

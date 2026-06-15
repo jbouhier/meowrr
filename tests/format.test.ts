@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { fmt } from "../src/lib/format.js";
+import { fmt } from "../src/lib/format";
 
 describe("fmt", () => {
   it("formats whole thousands without decimals", () => {
@@ -30,6 +30,6 @@ describe("fmt", () => {
 
   it("rounds consistently near boundaries", () => {
     expect(fmt(999.9)).toBe("999.9"); // < 1000
-    expect(fmt(1001)).toBe("1k");     // rounds to 1.0, trimmed to 1k
+    expect(fmt(1001)).toBe("1k"); // rounds to 1.0, trimmed to 1k
   });
 });

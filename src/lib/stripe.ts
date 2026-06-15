@@ -1,6 +1,14 @@
 export const STRIPE_BALANCE_URL = "https://api.stripe.com/v1/balance";
 
-export async function validateStripeKey(fetchImpl, key) {
+export interface StripeValidationResult {
+  ok: boolean;
+  error: string | null;
+}
+
+export async function validateStripeKey(
+  fetchImpl: typeof fetch,
+  key: string | undefined
+): Promise<StripeValidationResult> {
   if (!key || key.trim() === "") {
     return { ok: false, error: "missing_key" };
   }

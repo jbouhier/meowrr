@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { axisXIndices, buildPath, projectSparklinePoints } from "../src/lib/chart.js";
+import { axisXIndices, buildPath, projectSparklinePoints } from "../src/lib/chart";
 
 describe("axisXIndices", () => {
   it("returns all indices for 5 or fewer points", () => {
@@ -24,11 +24,15 @@ describe("buildPath", () => {
   });
 
   it("returns a move command for a single point", () => {
-    expect(buildPath([[10, 20]])).toBe("M 10,20");
+    expect(buildPath([[10, 20]] as const)).toBe("M 10,20");
   });
 
   it("builds a catmull-rom-style cubic bezier for multiple points", () => {
-    const pts = [[0, 100], [50, 50], [100, 0]];
+    const pts = [
+      [0, 100],
+      [50, 50],
+      [100, 0],
+    ] as const;
     const path = buildPath(pts);
     expect(path.startsWith("M 0,100")).toBe(true);
     expect(path.includes("C")).toBe(true);
@@ -36,14 +40,22 @@ describe("buildPath", () => {
   });
 
   it("uses default tension of 0.4", () => {
-    const pts = [[0, 0], [10, 10], [20, 0]];
+    const pts = [
+      [0, 0],
+      [10, 10],
+      [20, 0],
+    ] as const;
     const defaultPath = buildPath(pts);
     const explicitPath = buildPath(pts, 0.4);
     expect(defaultPath).toBe(explicitPath);
   });
 
   it("changes shape with different tension", () => {
-    const pts = [[0, 0], [10, 10], [20, 0]];
+    const pts = [
+      [0, 0],
+      [10, 10],
+      [20, 0],
+    ] as const;
     const loose = buildPath(pts, 0.1);
     const tight = buildPath(pts, 0.8);
     expect(loose).not.toBe(tight);
@@ -71,7 +83,7 @@ describe("projectSparklinePoints", () => {
 
   it("avoids division by zero for flat data", () => {
     const pts = projectSparklinePoints([42, 42, 42], W, H, pad, yTop, yBot);
-    expect(pts.every(p => p[1] === H - yBot)).toBe(true);
+    expect(pts.every((p) => p[1] === H - yBot)).toBe(true);
   });
 
   it("returns empty array for empty data", () => {
