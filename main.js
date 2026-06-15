@@ -1,3 +1,7 @@
+import { fmt } from "./src/lib/format.js";
+import { axisXIndices, buildPath, projectSparklinePoints } from "./src/lib/chart.js";
+import { validateStripeKey } from "./src/lib/stripe.js";
+
 // ── Data ───────────────────────────────────────────────────────────────────
 
 const RANGES = {
@@ -30,16 +34,6 @@ const RANGES = {
   },
 };
 
-function fmt(n, currency = false) {
-  const p = currency ? "$" : "";
-  if (n >= 1000000) return `${p}${parseFloat((n / 1000000).toFixed(1))}M`;
-  if (n >= 1000) {
-    const k = n / 1000;
-    return `${p}${k % 1 === 0 ? k : parseFloat(k.toFixed(1))}k`;
-  }
-  return `${p}${n}`;
-}
-
 // ── Range ──────────────────────────────────────────────────────────────────
 
 let currentRange = localStorage.getItem("meowrr_range") || "M";
@@ -69,34 +63,10 @@ document.querySelectorAll(".range-pill").forEach(btn => {
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
 
-function buildPath(pts, tension = 0.4) {
-  const d = [`M ${pts[0][0]},${pts[0][1]}`];
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[Math.max(i - 1, 0)];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[Math.min(i + 2, pts.length - 1)];
-    const c1x = p1[0] + (p2[0] - p0[0]) * tension;
-    const c1y = p1[1] + (p2[1] - p0[1]) * tension;
-    const c2x = p2[0] - (p3[0] - p1[0]) * tension;
-    const c2y = p2[1] - (p3[1] - p1[1]) * tension;
-    d.push(`C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)}`);
-  }
-  return d.join(" ");
-}
-
 let showAxis = localStorage.getItem("meowrr_show_axis") === "true";
 
 const svg       = document.getElementById("sparkline");
 const chartWrap = svg.parentElement;
-
-function axisXIndices(len) {
-  if (len <= 5) return Array.from({ length: len }, (_, i) => i);
-  const set = new Set([0]);
-  for (let i = 1; i < 4; i++) set.add(Math.round(i * (len - 1) / 4));
-  set.add(len - 1);
-  return [...set];
-}
 
 function drawSparkline(data, xLabels, animate = false) {
   const { width: W, height: H } = chartWrap.getBoundingClientRect();
@@ -108,14 +78,7 @@ function drawSparkline(data, xLabels, animate = false) {
   const yTop   = Math.max(dot_r * 3.5 + 2, Math.min(Math.max(8, stroke * 1.5), 14));
   const yBot   = showAxis ? Math.min(Math.max(22, H * 0.15), 36) : Math.min(Math.max(8, stroke * 1.5), 14);
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const pts = data.map((v, i) => [
-    xPad + (i / (data.length - 1)) * (W - xPad * 2),
-    H - yBot - ((v - min) / range) * (H - yTop - yBot),
-  ]);
+  const pts = projectSparklinePoints(data, W, H, xPad, yTop, yBot);
 
   const line = buildPath(pts);
   const last = pts[pts.length - 1];
@@ -246,17 +209,12 @@ updateRefreshText();
 async function checkStripe() {
   const key = localStorage.getItem("meowrr_api_key");
   if (!key) return; // no key → demo data, no error
-  try {
-    const res = await fetch("https://api.stripe.com/v1/balance", {
-      headers: { Authorization: `Bearer ${key}` },
-    });
-    document.getElementById("error-banner").classList.toggle("hidden", res.ok);
-    if (res.ok) {
-      lastRefreshed = new Date();
-      updateRefreshText();
-    }
-  } catch {
-    document.getElementById("error-banner").classList.remove("hidden");
+
+  const result = await validateStripeKey(fetch, key);
+  document.getElementById("error-banner").classList.toggle("hidden", result.ok);
+  if (result.ok) {
+    lastRefreshed = new Date();
+    updateRefreshText();
   }
 }
 
