@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["bun"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "src-tauri"]
