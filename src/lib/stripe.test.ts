@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { STRIPE_BALANCE_URL, validateStripeKey } from "../src/lib/stripe";
+import { STRIPE_BALANCE_URL, validateStripeKey } from "./stripe";
 
 function makeFetch(status: number, ok: boolean) {
   return async (url: string, opts: { headers: Record<string, string> }) => {

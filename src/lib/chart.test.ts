@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { axisXIndices, buildPath, projectSparklinePoints } from "../src/lib/chart";
+import { axisXIndices, buildPath, projectSparklinePoints } from "./chart";
 
 describe("axisXIndices", () => {
   it("returns all indices for 5 or fewer points", () => {

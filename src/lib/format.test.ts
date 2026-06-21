@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { fmt } from "../src/lib/format";
+import { fmt } from "./format";
 
 describe("fmt", () => {
   it("formats whole thousands without decimals", () => {
