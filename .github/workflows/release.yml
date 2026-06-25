@@ -87,11 +87,19 @@ jobs:
           REPO="${{ github.repository }}"
           TAG="$GITHUB_REF_NAME"
           mkdir -p dist-release
-          # Drafts aren't reachable via releases/tags/<tag>; list all and match.
+          echo "Looking for releases with tag: $TAG"
+          echo "--- All releases (published + draft) ---"
+          gh api "repos/$REPO/releases" --paginate \
+            | jq -r '.[] | "\(.id)\t\(.tag_name)\t\(.draft)\t\(.name)"'
+          echo "--- searching ---"
           RELEASE_ID=$(gh api "repos/$REPO/releases" --paginate \
             | jq -r ".[] | select(.tag_name == \"$TAG\") | .id" | head -n1)
           if [ -z "${RELEASE_ID:-}" ]; then
-            echo "No release (published or draft) found for tag $TAG"
+            echo "No release found for tag $TAG — retrying via releases/tags/<tag>"
+            RELEASE_ID=$(gh api "repos/$REPO/releases/tags/$TAG" --jq ".id" 2>/dev/null || true)
+          fi
+          if [ -z "${RELEASE_ID:-}" ]; then
+            echo "Still not found. Aborting."
             exit 1
           fi
           echo "Found release id: $RELEASE_ID"
