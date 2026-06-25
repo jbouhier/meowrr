@@ -53,10 +53,68 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
           tagName: v__VERSION__
           releaseName: 'MeowRR v__VERSION__'
           releaseBody: 'See assets below to download and install.'
           releaseDraft: true
           prerelease: false
+          updaterJsonPreferNsis: true
           args: ${{ matrix.args }}
+
+  publish-r2:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install wrangler
+        run: bun add -g wrangler
+
+      - name: Resolve version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download all release assets
+        run: gh release download "$GITHUB_REF_NAME" --dir dist-release --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+
+      - name: Rewrite latest.json URLs to R2
+        run: |
+          jq --arg base "https://releases.meowrr.com/${{ steps.ver.outputs.version }}" '
+            .platforms |= with_entries(.value.url = ($base + "/" + (.value.url | split("/") | last)))
+          ' dist-release/latest.json > dist-release/latest.rewritten.json
+          mv dist-release/latest.rewritten.json dist-release/latest.json
+
+      - name: Upload latest.json to R2 (5-min TTL)
+        run: |
+          wrangler r2 object put meowrr-releases/latest.json \
+            --file dist-release/latest.json \
+            --remote \
+            --content-type application/json \
+            --cache-control "public, max-age=300"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Upload bundles to R2 (immutable)
+        run: |
+          for f in dist-release/*; do
+            name=$(basename "$f")
+            [ "$name" = "latest.json" ] && continue
+            wrangler r2 object put "meowrr-releases/${{ steps.ver.outputs.version }}/$name" \
+              --file "$f" \
+              --remote \
+              --cache-control "public, max-age=31536000, immutable"
+          done
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

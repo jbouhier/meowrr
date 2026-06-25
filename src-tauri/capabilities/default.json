@@ -15,6 +15,8 @@
     "core:window:allow-outer-position",
     "window-state:allow-restore-state",
     "window-state:allow-save-window-state",
+    "updater:default",
+    "process:default",
     "allow-close-app",
     "allow-toggle-maximize",
     "allow-set-always-on-top"

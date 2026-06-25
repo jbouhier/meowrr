@@ -284,6 +284,41 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Update banner ── */
+.update-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px clamp(12px, 4vw, 28px);
+  font-size: clamp(9px, 2.5vw, 12px);
+  font-weight: 600;
+  color: var(--accent, #818cf8);
+  background: rgba(99, 102, 241, 0.10);
+  flex-shrink: 0;
+}
+.update-banner.hidden {
+  display: none;
+}
+.update-btn {
+  margin-left: auto;
+  border: none;
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-size: inherit;
+  font-weight: 700;
+  color: #0c0c0f;
+  background: var(--accent, #818cf8);
+  cursor: pointer;
+  transition: filter .15s;
+}
+.update-btn:hover {
+  filter: brightness(1.1);
+}
+.update-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* ── Stats: anchored top-left, scales with window ── */
 .stats {
   display: flex;
@@ -413,6 +448,9 @@ body {
     display: none;
   }
   .error-banner {
+    display: none;
+  }
+  .update-banner {
     display: none;
   }
   .range-pills {

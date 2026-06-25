@@ -92,6 +92,8 @@ pub fn run() {
             mode: Mutex::new(FullscreenMode::Off),
         })
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![close_app, toggle_maximize, set_always_on_top])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
