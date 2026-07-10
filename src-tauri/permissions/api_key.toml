@@ -1,0 +1,14 @@
+[[permission]]
+identifier = "allow-save-api-key"
+description = "Allows saving the Stripe API key to the OS keychain"
+commands.allow = ["save_api_key"]
+
+[[permission]]
+identifier = "allow-load-api-key"
+description = "Allows loading the Stripe API key from the OS keychain"
+commands.allow = ["load_api_key"]
+
+[[permission]]
+identifier = "allow-clear-api-key"
+description = "Allows clearing the Stripe API key from the OS keychain"
+commands.allow = ["clear_api_key"]

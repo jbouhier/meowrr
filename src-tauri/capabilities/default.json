@@ -19,6 +19,9 @@
     "process:default",
     "allow-close-app",
     "allow-toggle-maximize",
-    "allow-set-always-on-top"
+    "allow-set-always-on-top",
+    "allow-save-api-key",
+    "allow-load-api-key",
+    "allow-clear-api-key"
   ]
 }
