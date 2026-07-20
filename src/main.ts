@@ -289,9 +289,7 @@ setTimeout(checkForUpdates, 3000);
 // ── Error state ────────────────────────────────────────────────────────────
 
 async function checkStripe(): Promise<void> {
-  const key = await window.__TAURI__.core
-    .invoke<string | null>("load_api_key")
-    .catch(() => null);
+  const key = localStorage.getItem("meowrr_api_key");
   if (!key) return; // no key → demo data, no error
   const banner = document.getElementById("error-banner");
   if (!banner) return;
@@ -321,20 +319,17 @@ function copyMRR(): void {
 
 // ── Settings persistence ───────────────────────────────────────────────────
 
-async function loadSettings(): Promise<void> {
-  const saved = await window.__TAURI__.core
-    .invoke<string | null>("load_api_key")
-    .catch(() => null);
+function loadSettings(): void {
+  const saved = localStorage.getItem("meowrr_api_key");
   const input = document.getElementById("api-key") as HTMLInputElement | null;
   if (saved && input) input.value = saved;
 }
 
-async function saveSettings(): Promise<void> {
+function saveSettings(): void {
   const input = document.getElementById("api-key") as HTMLInputElement | null;
   const key = input?.value.trim() ?? "";
-  if (key)
-    await window.__TAURI__.core.invoke("save_api_key", { value: key }).catch(() => {});
-  else await window.__TAURI__.core.invoke("clear_api_key").catch(() => {});
+  if (key) localStorage.setItem("meowrr_api_key", key);
+  else localStorage.removeItem("meowrr_api_key");
   checkStripe();
 }
 

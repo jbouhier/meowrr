@@ -1,37 +1,5 @@
 use std::sync::Mutex;
-use keyring::Entry;
 use tauri::{Manager, PhysicalPosition, PhysicalSize, Position, Size};
-
-const KEYCHAIN_SERVICE: &str = "MeowRR";
-const KEYCHAIN_ACCOUNT: &str = "stripe_api_key";
-
-#[tauri::command]
-fn save_api_key(value: String) -> Result<(), String> {
-    Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT)
-        .map_err(|e| e.to_string())?
-        .set_password(&value)
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn load_api_key() -> Result<Option<String>, String> {
-    let entry = Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT).map_err(|e| e.to_string())?;
-    match entry.get_password() {
-        Ok(v) => Ok(Some(v)),
-        Err(keyring::Error::NoEntry) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
-fn clear_api_key() -> Result<(), String> {
-    let entry = Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT).map_err(|e| e.to_string())?;
-    match entry.delete_credential() {
-        Ok(()) => Ok(()),
-        Err(keyring::Error::NoEntry) => Ok(()),
-        Err(e) => Err(e.to_string()),
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(dead_code)]
@@ -127,13 +95,10 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
-        close_app,
-        toggle_maximize,
-        set_always_on_top,
-        save_api_key,
-        load_api_key,
-        clear_api_key
-    ])
+            close_app,
+            toggle_maximize,
+            set_always_on_top,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
