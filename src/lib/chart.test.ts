@@ -16,6 +16,11 @@ describe("axisXIndices", () => {
   it("handles a 6-point series", () => {
     expect(axisXIndices(6)).toEqual([0, 1, 3, 4, 5])
   })
+
+  it("reduces labels for narrow plots while keeping both endpoints", () => {
+    expect(axisXIndices(12, 3)).toEqual([0, 6, 11])
+    expect(axisXIndices(4, 3)).toEqual([0, 2, 3])
+  })
 })
 
 describe("buildPath", () => {
@@ -73,6 +78,12 @@ describe("projectSparklinePoints", () => {
     const pts = projectSparklinePoints([0, 50, 100], W, H, pad, yTop, yBot)
     expect(pts[0][0]).toBeCloseTo(pad)
     expect(pts[2][0]).toBeCloseTo(W - pad)
+  })
+
+  it("supports a wider left gutter for value labels", () => {
+    const pts = projectSparklinePoints([0, 100], W, H, 30, yTop, yBot, 10)
+    expect(pts[0][0]).toBeCloseTo(30)
+    expect(pts[1][0]).toBeCloseTo(90)
   })
 
   it("maps min value to the bottom padding and max to the top padding", () => {

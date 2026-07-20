@@ -1,28 +1,56 @@
-import type { RangeKey } from "./types"
-import { setRange, copyMRR } from "./ranges"
-import { openSettings, closeSettings } from "./settings"
-import { toggleMaximize, setAlwaysOnTop, closeWindow } from "./window"
+import { copyMRR, setRange } from "./ranges"
+import { closeSettings, openSettings } from "./settings"
+import { shortcutOverlayAction } from "./shortcut-overlay"
 import { getAlwaysOnTop, getCurrentRange, getIsMaximized } from "./state"
+import { dismissTabHint } from "./tab-hint"
+import type { RangeKey } from "./types"
+import { closeWindow, setAlwaysOnTop, toggleMaximize } from "./window"
 
 const shortcutsOverlay = document.getElementById("shortcuts-overlay")
+const shortcutsClose = document.getElementById("shortcuts-close")
+const tabHint = document.getElementById("tab-hint")
 const settingsView = document.getElementById("settings-view")
 
 const RANGE_ORDER: RangeKey[] = ["M", "Y", "A"]
 
+function setShortcutsVisible(visible: boolean): void {
+  if (!shortcutsOverlay) return
+  shortcutsOverlay.classList.toggle("visible", visible)
+  shortcutsOverlay.setAttribute("aria-hidden", String(!visible))
+  if (shortcutsClose) shortcutsClose.tabIndex = visible ? 0 : -1
+}
+
+function openShortcuts(): void {
+  dismissTabHint()
+  setShortcutsVisible(true)
+  shortcutsClose?.focus()
+}
+
+function closeShortcuts(): void {
+  setShortcutsVisible(false)
+}
+
 export function initShortcuts(): void {
-  document.addEventListener("keyup", (e) => {
-    if (e.key === "Tab" && shortcutsOverlay) shortcutsOverlay.classList.remove("visible")
-  })
+  shortcutsClose?.addEventListener("click", closeShortcuts)
+  tabHint?.addEventListener("click", openShortcuts)
 
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return // ignore modified keys
     const inSettings = settingsView ? !settingsView.classList.contains("hidden") : false
+    const overlayVisible = shortcutsOverlay?.classList.contains("visible") ?? false
+    const overlayAction = shortcutOverlayAction(
+      e.key,
+      overlayVisible,
+      inSettings,
+      e.repeat,
+      e.ctrlKey || e.metaKey || e.altKey
+    )
 
-    if (e.key === "Tab") {
-      e.preventDefault()
-      if (!inSettings && shortcutsOverlay) shortcutsOverlay.classList.add("visible")
+    if (overlayAction) {
+      if (e.key === "Tab") dismissTabHint()
+      setShortcutsVisible(overlayAction === "show")
       return
     }
+    if (e.ctrlKey || e.metaKey || e.altKey) return // ignore modified keys
 
     if (e.key === "Escape") {
       if (inSettings) closeSettings()
@@ -41,8 +69,10 @@ export function initShortcuts(): void {
       else if (e.key === "x" || e.key === "X") {
         const axisToggle = document.getElementById("axis-toggle")
         axisToggle?.click()
-      } else if (e.key === "s" || e.key === "S") openSettings()
-      else if (e.key === "q" || e.key === "Q") closeWindow()
+      } else if (e.key === "s" || e.key === "S") {
+        closeShortcuts()
+        openSettings()
+      } else if (e.key === "q" || e.key === "Q") closeWindow()
     }
   })
 }

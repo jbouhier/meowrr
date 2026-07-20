@@ -13,6 +13,7 @@
   --border: #1c1c24;
   --accent: #6366f1;
   --green: #22c55e;
+  --window-edge: clamp(12px, 4vw, 28px);
 }
 
 html,
@@ -38,8 +39,11 @@ body {
   overflow: hidden;
 }
 
-.hidden {
-  display: none !important;
+.view.hidden,
+.error-banner.hidden,
+.update-banner.hidden,
+.status-action.hidden {
+  display: none;
 }
 
 /* ── Widget view ── */
@@ -47,7 +51,7 @@ body {
   position: relative;
 }
 
-/* ── Shortcuts overlay — Tab hold ── */
+/* ── Shortcuts overlay — Tab toggle ── */
 #shortcuts-overlay {
   position: absolute;
   inset: 0;
@@ -56,8 +60,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: clamp(12px, 4vw, 40px);
-  background: rgba(12, 12, 15, 0.9);
+  padding: calc(var(--window-edge) + 20px) var(--window-edge) var(--window-edge);
+  background: rgba(12, 12, 15, 0.97);
   backdrop-filter: blur(6px);
   border-radius: 10px;
   pointer-events: none;
@@ -69,6 +73,43 @@ body {
 #shortcuts-overlay.visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: clamp(8px, 2vh, 16px);
+  flex-shrink: 0;
+}
+
+.shortcuts-title {
+  color: var(--muted);
+  font-size: clamp(10px, min(2.8vw, 2.5vh), 14px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.shortcuts-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(26px, 6vw, 40px);
+  height: clamp(26px, 6vw, 40px);
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.shortcuts-close:hover,
+.shortcuts-close:focus-visible {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
 }
 #shortcuts-overlay::-webkit-scrollbar {
   width: 4px;
@@ -198,6 +239,8 @@ body {
   font-size: clamp(12px, min(4vw, 3.5vh), 22px);
   padding: clamp(4px, 1.2vh, 10px) clamp(12px, 4vw, 24px);
   border-radius: 100px;
+  font-family: inherit;
+  cursor: pointer;
   pointer-events: none;
   z-index: 5;
   opacity: 0;
@@ -205,6 +248,12 @@ body {
 }
 .tab-hint.show {
   opacity: 1;
+  pointer-events: auto;
+}
+.tab-hint:hover,
+.tab-hint:focus-visible {
+  background: rgba(255, 255, 255, 0.11);
+  outline: none;
 }
 
 /* ── Custom tooltip ── */
@@ -246,7 +295,7 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: clamp(3px, 1vw, 8px) clamp(4px, 1.5vw, 10px);
+  padding: clamp(3px, 1vw, 8px) var(--window-edge);
   flex-shrink: 0;
 }
 
@@ -258,8 +307,8 @@ body {
 /* ── Settings button — fixed bottom-right ── */
 .settings-corner {
   position: absolute;
-  bottom: clamp(8px, 2.5vw, 16px);
-  right: clamp(8px, 2.5vw, 16px);
+  bottom: var(--window-edge);
+  right: var(--window-edge);
   z-index: 10;
 }
 
@@ -277,11 +326,41 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px clamp(12px, 4vw, 28px);
+  padding: 5px var(--window-edge);
   font-size: clamp(9px, 2.5vw, 12px);
   color: #f59e0b;
   background: rgba(245, 158, 11, 0.08);
   flex-shrink: 0;
+}
+.error-banner #error-message {
+  min-width: 0;
+}
+.status-action {
+  margin-left: auto;
+  border: 0;
+  padding: 2px 7px;
+  border-radius: 100px;
+  color: inherit;
+  background: rgba(245, 158, 11, 0.14);
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.connection-message {
+  min-height: 1.2em;
+  margin: 5px 0 0;
+  font-size: clamp(9px, 2.5vw, 11px);
+}
+.connection-message[data-state="error"] {
+  color: #f59e0b;
+}
+.connection-message[data-state="progress"] {
+  color: var(--muted);
+}
+.connection-message[data-state="success"] {
+  color: #34d399;
 }
 
 /* ── Update banner ── */
@@ -289,7 +368,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px clamp(12px, 4vw, 28px);
+  padding: 5px var(--window-edge);
   font-size: clamp(9px, 2.5vw, 12px);
   font-weight: 600;
   color: var(--accent, #818cf8);
@@ -323,7 +402,7 @@ body {
 .stats {
   display: flex;
   flex-direction: column;
-  padding: 0 clamp(12px, 4vw, 28px) clamp(4px, 1vh, 10px);
+  padding: 0 var(--window-edge) clamp(4px, 1vh, 10px);
   flex-shrink: 0;
 }
 
@@ -414,7 +493,7 @@ body {
     padding-bottom: 0;
   }
   .stats {
-    padding: 0 clamp(8px, 3vw, 16px);
+    padding: 0 var(--window-edge);
   }
   .stat-label {
     margin-bottom: 0;
@@ -525,8 +604,8 @@ body {
 /* Refresh hint — appears on chart hover */
 .refresh-hint {
   position: absolute;
-  bottom: 8px;
-  right: 10px;
+  bottom: var(--window-edge);
+  right: var(--window-edge);
   font-size: 10px;
   color: var(--muted);
   opacity: 0;
@@ -612,7 +691,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(6px, 2.5vw, 16px);
+  padding: clamp(6px, 2.5vw, 16px) var(--window-edge);
   flex-shrink: 0;
 }
 
@@ -652,10 +731,11 @@ body {
 /* ── Settings body ── */
 .settings-body {
   flex: 1;
-  padding: clamp(12px, 4.5vh, 42px) clamp(12px, 5vw, 48px);
+  padding: clamp(12px, 4.5vh, 42px) var(--window-edge);
   display: flex;
   flex-direction: column;
   gap: clamp(12px, 3vh, 28px);
+  overflow-y: auto;
 }
 
 .field {
@@ -714,4 +794,63 @@ body {
 }
 .btn-save:hover {
   opacity: 0.85;
+}
+.btn-save:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.settings-footer {
+  align-self: center;
+  margin-top: auto;
+}
+
+.creator-link {
+  border: 0;
+  background: none;
+  color: #6b6b80;
+  cursor: pointer;
+  font: inherit;
+  font-size: clamp(12px, 2.8vw, 15px);
+  font-weight: 500;
+  padding: 4px 6px;
+  transition: color 0.15s;
+}
+
+.creator-link:hover,
+.creator-link:focus-visible {
+  color: var(--text);
+  outline: none;
+}
+
+@media (max-height: 300px) {
+  .settings-body {
+    padding-block: 8px;
+    gap: 6px;
+  }
+
+  .creator-link {
+    padding-block: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #shortcuts-overlay,
+  .tab-hint,
+  #tooltip,
+  .update-btn,
+  .range-pill,
+  .range-pill::after,
+  .titlebar,
+  .refresh-hint,
+  .copy-toast,
+  .toggle-btn,
+  .toggle-thumb,
+  .btn-icon,
+  .shortcuts-close,
+  .creator-link,
+  .field input,
+  .btn-save {
+    transition: none;
+  }
 }

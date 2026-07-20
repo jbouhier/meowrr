@@ -14,72 +14,113 @@ struct PreFullscreen {
     mode: Mutex<FullscreenMode>,
 }
 
-
 #[tauri::command]
 fn close_app(app: tauri::AppHandle) {
     app.exit(0);
 }
 
 #[tauri::command]
-fn set_always_on_top(app: tauri::AppHandle, value: bool) {
-    if let Some(win) = app.get_webview_window("main") {
-        let _ = win.set_always_on_top(value);
-    }
+fn set_always_on_top(app: tauri::AppHandle, value: bool) -> Result<bool, String> {
+    let win = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window is unavailable".to_string())?;
+    win.set_always_on_top(value)
+        .map_err(|error| error.to_string())?;
+    Ok(value)
 }
 
-
 #[tauri::command]
-fn toggle_maximize(app: tauri::AppHandle) {
-    let Some(win) = app.get_webview_window("main") else { return };
+fn toggle_maximize(app: tauri::AppHandle) -> Result<bool, String> {
+    let win = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window is unavailable".to_string())?;
 
     let state = app.state::<PreFullscreen>();
-    let current_mode = *state.mode.lock().unwrap();
+    let current_mode = *state
+        .mode
+        .lock()
+        .map_err(|_| "fullscreen state is unavailable".to_string())?;
 
     match current_mode {
         FullscreenMode::Off => {
             let size = win.outer_size().ok();
             let pos = win.outer_position().ok();
-            *state.saved.lock().unwrap() = size.zip(pos);
+            *state
+                .saved
+                .lock()
+                .map_err(|_| "saved window state is unavailable".to_string())? = size.zip(pos);
 
             #[cfg(target_os = "macos")]
             {
-                let _ = win.set_simple_fullscreen(true);
-                *state.mode.lock().unwrap() = FullscreenMode::Simple;
+                win.set_simple_fullscreen(true)
+                    .map_err(|error| error.to_string())?;
+                *state
+                    .mode
+                    .lock()
+                    .map_err(|_| "fullscreen state is unavailable".to_string())? =
+                    FullscreenMode::Simple;
             }
             #[cfg(not(target_os = "macos"))]
             {
-                let _ = win.set_fullscreen(true);
-                *state.mode.lock().unwrap() = FullscreenMode::Native;
+                win.set_fullscreen(true)
+                    .map_err(|error| error.to_string())?;
+                *state
+                    .mode
+                    .lock()
+                    .map_err(|_| "fullscreen state is unavailable".to_string())? =
+                    FullscreenMode::Native;
             }
 
             let _ = win.set_focus();
+            Ok(true)
         }
         FullscreenMode::Simple => {
             #[cfg(target_os = "macos")]
             {
-                let _ = win.set_simple_fullscreen(false);
+                win.set_simple_fullscreen(false)
+                    .map_err(|error| error.to_string())?;
             }
             #[cfg(not(target_os = "macos"))]
             {
-                let _ = win.set_fullscreen(false);
+                win.set_fullscreen(false)
+                    .map_err(|error| error.to_string())?;
             }
-            *state.mode.lock().unwrap() = FullscreenMode::Off;
+            *state
+                .mode
+                .lock()
+                .map_err(|_| "fullscreen state is unavailable".to_string())? = FullscreenMode::Off;
 
-            if let Some((size, pos)) = state.saved.lock().unwrap().take() {
+            if let Some((size, pos)) = state
+                .saved
+                .lock()
+                .map_err(|_| "saved window state is unavailable".to_string())?
+                .take()
+            {
                 let _ = win.set_size(Size::Physical(size));
                 let _ = win.set_position(Position::Physical(pos));
             }
             let _ = win.set_focus();
+            Ok(false)
         }
         FullscreenMode::Native => {
-            let _ = win.set_fullscreen(false);
-            *state.mode.lock().unwrap() = FullscreenMode::Off;
+            win.set_fullscreen(false)
+                .map_err(|error| error.to_string())?;
+            *state
+                .mode
+                .lock()
+                .map_err(|_| "fullscreen state is unavailable".to_string())? = FullscreenMode::Off;
 
-            if let Some((size, pos)) = state.saved.lock().unwrap().take() {
+            if let Some((size, pos)) = state
+                .saved
+                .lock()
+                .map_err(|_| "saved window state is unavailable".to_string())?
+                .take()
+            {
                 let _ = win.set_size(Size::Physical(size));
                 let _ = win.set_position(Position::Physical(pos));
             }
             let _ = win.set_focus();
+            Ok(false)
         }
     }
 }
@@ -92,6 +133,7 @@ pub fn run() {
             mode: Mutex::new(FullscreenMode::Off),
         })
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![

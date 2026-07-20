@@ -17,6 +17,10 @@
     "window-state:allow-save-window-state",
     "updater:default",
     "process:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://jbouhier.com" }]
+    },
     "allow-close-app",
     "allow-toggle-maximize",
     "allow-set-always-on-top"

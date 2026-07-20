@@ -1,81 +1,100 @@
-import {
-  getAlwaysOnTop,
-  setAlwaysOnTopState,
-  getIsMaximized,
-  setIsMaximized,
-  getDragAbort,
-  setDragAbort,
-} from "./state"
+import { invoke } from "@tauri-apps/api/core"
+import { getCurrentWindow } from "@tauri-apps/api/window"
+import { getAlwaysOnTop, getIsMaximized, setAlwaysOnTopState, setIsMaximized } from "./state"
 
-const ICON_MAXIMIZE = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`
-const ICON_RESTORE = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`
+const ICON_MAXIMIZE = `<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`
+const ICON_RESTORE = `<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`
 
 const pinBtn = document.getElementById("pin-btn")
 const maximizeBtn = document.getElementById("maximize-btn")
 const closeBtn = document.getElementById("close-btn")
+let pinPending = false
+let maximizePending = false
 
-export async function setAlwaysOnTop(value: boolean): Promise<void> {
-  setAlwaysOnTopState(value)
-  await window.__TAURI__.core.invoke("set_always_on_top", { value })
+function renderPin(value: boolean): void {
   if (!pinBtn) return
   pinBtn.classList.toggle("pinned", value)
   pinBtn.dataset.tip = value ? "Unpin [T]" : "Keep on top [T]"
+  pinBtn.setAttribute("aria-label", value ? "Stop keeping on top" : "Keep on top")
+}
+
+function renderMaximize(value: boolean): void {
+  const widgetView = document.getElementById("widget-view")
+  if (!maximizeBtn || !widgetView) return
+  maximizeBtn.innerHTML = value ? ICON_RESTORE : ICON_MAXIMIZE
+  maximizeBtn.title = value ? "Restore" : "Maximize"
+  maximizeBtn.setAttribute("aria-label", value ? "Restore" : "Fullscreen")
+  widgetView.classList.toggle("maximized", value)
+}
+
+export async function setAlwaysOnTop(value: boolean): Promise<void> {
+  if (pinPending) return
+  pinPending = true
+  try {
+    const applied = await invoke<boolean>("set_always_on_top", { value })
+    setAlwaysOnTopState(applied)
+    renderPin(applied)
+  } catch {
+    renderPin(getAlwaysOnTop())
+  } finally {
+    pinPending = false
+  }
 }
 
 export async function toggleMaximize(): Promise<void> {
-  await window.__TAURI__.core.invoke("toggle_maximize")
-  const isMax = !getIsMaximized()
-  setIsMaximized(isMax)
-  const widgetView = document.getElementById("widget-view")
-  if (!maximizeBtn || !widgetView) return
-  maximizeBtn.innerHTML = isMax ? ICON_RESTORE : ICON_MAXIMIZE
-  maximizeBtn.title = isMax ? "Restore" : "Maximize"
-  widgetView.classList.toggle("maximized", isMax)
+  if (maximizePending) return
+  maximizePending = true
+  try {
+    const isMaximized = await invoke<boolean>("toggle_maximize")
+    setIsMaximized(isMaximized)
+    renderMaximize(isMaximized)
+  } catch {
+    renderMaximize(getIsMaximized())
+  } finally {
+    maximizePending = false
+  }
 }
 
 export async function closeWindow(): Promise<void> {
-  await window.__TAURI__.core.invoke("close_app")
+  await invoke("close_app")
 }
 
 export function initWindow(): void {
-  if (getAlwaysOnTop()) {
-    window.__TAURI__.core.invoke("set_always_on_top", { value: true })
-    if (pinBtn) {
-      pinBtn.classList.add("pinned")
-      pinBtn.dataset.tip = "Unpin [T]"
-    }
-  }
-  if (pinBtn) pinBtn.addEventListener("click", () => setAlwaysOnTop(!getAlwaysOnTop()))
-  if (maximizeBtn) maximizeBtn.addEventListener("click", toggleMaximize)
-  if (closeBtn) closeBtn.addEventListener("click", closeWindow)
+  renderPin(getAlwaysOnTop())
+  renderMaximize(getIsMaximized())
+  if (getAlwaysOnTop()) void setAlwaysOnTop(true)
 
-  document.addEventListener("mousedown", (e) => {
+  pinBtn?.addEventListener("click", () => void setAlwaysOnTop(!getAlwaysOnTop()))
+  maximizeBtn?.addEventListener("click", () => void toggleMaximize())
+  closeBtn?.addEventListener("click", () => void closeWindow())
+
+  let dragAbort: AbortController | null = null
+  document.addEventListener("mousedown", (event) => {
     if (
-      e.button !== 0 ||
-      (e.target instanceof Element && e.target.closest("button, input, [role='switch']"))
-    )
+      event.button !== 0 ||
+      (event.target instanceof Element && event.target.closest("button, input, [role='switch']"))
+    ) {
       return
+    }
 
-    const existing = getDragAbort()
-    if (existing) existing.abort()
-    const dragAbort = new AbortController()
-    setDragAbort(dragAbort)
+    dragAbort?.abort()
+    dragAbort = new AbortController()
     const { signal } = dragAbort
-
-    const startX = e.clientX
-    const startY = e.clientY
+    const startX = event.clientX
+    const startY = event.clientY
 
     document.addEventListener(
       "mousemove",
-      (ev) => {
-        if (Math.abs(ev.clientX - startX) > 3 || Math.abs(ev.clientY - startY) > 3) {
-          window.__TAURI__.core.invoke("plugin:window|start_dragging")
-          dragAbort.abort()
+      (moveEvent) => {
+        if (Math.abs(moveEvent.clientX - startX) > 3 || Math.abs(moveEvent.clientY - startY) > 3) {
+          void getCurrentWindow()
+            .startDragging()
+            .catch(() => undefined)
+          dragAbort?.abort()
         }
       },
       { signal }
     )
-
-    document.addEventListener("mouseup", () => dragAbort.abort(), { signal, once: true })
+    document.addEventListener("mouseup", () => dragAbort?.abort(), { signal, once: true })
   })
 }

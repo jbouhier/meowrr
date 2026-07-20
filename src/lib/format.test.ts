@@ -32,4 +32,8 @@ describe("fmt", () => {
     expect(fmt(999.9)).toBe("999.9") // < 1000
     expect(fmt(1001)).toBe("1k") // rounds to 1.0, trimmed to 1k
   })
+
+  it("puts the sign before a currency value", () => {
+    expect(fmt(-1250, true)).toBe("−$1.3k")
+  })
 })

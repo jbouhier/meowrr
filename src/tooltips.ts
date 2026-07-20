@@ -10,7 +10,10 @@ function showTip(el: HTMLElement): void {
     if (bracketIdx !== -1) {
       const label = raw.slice(0, bracketIdx).trim()
       const key = raw.slice(bracketIdx + 1, raw.indexOf("]")).trim()
-      tooltip.innerHTML = `${label} <kbd>${key}</kbd>`
+      tooltip.replaceChildren(document.createTextNode(`${label} `))
+      const keyboardKey = document.createElement("kbd")
+      keyboardKey.textContent = key
+      tooltip.appendChild(keyboardKey)
     } else {
       tooltip.textContent = raw
     }
@@ -38,5 +41,7 @@ export function initTooltips(): void {
     if (!(el instanceof HTMLElement)) return
     el.addEventListener("mouseenter", () => showTip(el))
     el.addEventListener("mouseleave", hideTip)
+    el.addEventListener("focus", () => showTip(el))
+    el.addEventListener("blur", hideTip)
   })
 }

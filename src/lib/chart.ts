@@ -1,7 +1,12 @@
-export function axisXIndices(len: number): number[] {
-  if (len <= 5) return Array.from({ length: len }, (_, i) => i)
+export function axisXIndices(len: number, maxLabels = 5): number[] {
+  if (len <= 0 || maxLabels <= 0) return []
+  if (len <= maxLabels) return Array.from({ length: len }, (_, i) => i)
+  if (maxLabels === 1) return [0]
+
   const set = new Set([0])
-  for (let i = 1; i < 4; i++) set.add(Math.round((i * (len - 1)) / 4))
+  for (let i = 1; i < maxLabels - 1; i++) {
+    set.add(Math.round((i * (len - 1)) / (maxLabels - 1)))
+  }
   set.add(len - 1)
   return [...set]
 }
@@ -33,16 +38,17 @@ export function projectSparklinePoints(
   H: number,
   xPad: number,
   yTop: number,
-  yBot: number
+  yBot: number,
+  xRight = xPad
 ): [number, number][] {
   if (data.length === 0) return []
   const min = Math.min(...data)
   const max = Math.max(...data)
   const range = max - min || 1
-  const usableWidth = W - xPad * 2
+  const usableWidth = W - xPad - xRight
 
   return data.map((v, i) => [
-    data.length === 1 ? W / 2 : xPad + (i / (data.length - 1)) * usableWidth,
+    data.length === 1 ? xPad + usableWidth / 2 : xPad + (i / (data.length - 1)) * usableWidth,
     H - yBot - ((v - min) / range) * (H - yTop - yBot),
   ])
 }
