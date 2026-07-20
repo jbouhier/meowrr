@@ -1,4 +1,4 @@
-import type { UserConfig } from "vite";
+import type { UserConfig } from "vite"
 
 export default {
   clearScreen: false,
@@ -9,4 +9,4 @@ export default {
       ignored: ["**/src-tauri/**"],
     },
   },
-} satisfies UserConfig;
+} satisfies UserConfig

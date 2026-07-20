@@ -64,7 +64,7 @@ body {
   overflow-y: auto;
   scrollbar-gutter: stable;
   opacity: 0;
-  transition: opacity .2s;
+  transition: opacity 0.2s;
 }
 #shortcuts-overlay.visible {
   opacity: 1;
@@ -201,7 +201,7 @@ body {
   pointer-events: none;
   z-index: 5;
   opacity: 0;
-  transition: opacity .4s;
+  transition: opacity 0.4s;
 }
 .tab-hint.show {
   opacity: 1;
@@ -220,7 +220,7 @@ body {
   color: var(--text);
   white-space: nowrap;
   opacity: 0;
-  transition: opacity .12s;
+  transition: opacity 0.12s;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -293,7 +293,7 @@ body {
   font-size: clamp(9px, 2.5vw, 12px);
   font-weight: 600;
   color: var(--accent, #818cf8);
-  background: rgba(99, 102, 241, 0.10);
+  background: rgba(99, 102, 241, 0.1);
   flex-shrink: 0;
 }
 .update-banner.hidden {
@@ -309,7 +309,7 @@ body {
   color: #0c0c0f;
   background: var(--accent, #818cf8);
   cursor: pointer;
-  transition: filter .15s;
+  transition: filter 0.15s;
 }
 .update-btn:hover {
   filter: brightness(1.1);
@@ -369,7 +369,7 @@ body {
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
-  transition: color .12s;
+  transition: color 0.12s;
 }
 
 .range-pill::after {
@@ -382,7 +382,7 @@ body {
   border-radius: 50%;
   background: var(--accent);
   transform: translateX(-50%) scale(0);
-  transition: transform .15s ease-out;
+  transition: transform 0.15s ease-out;
 }
 
 .range-pill:hover {
@@ -438,11 +438,11 @@ body {
     z-index: 10;
     opacity: 0;
     padding: 8px 10px;
-    transition: opacity .2s .3s;
+    transition: opacity 0.2s 0.3s;
   }
   #widget-view:hover .titlebar {
     opacity: 1;
-    transition: opacity .2s;
+    transition: opacity 0.2s;
   }
   .chart-wrap {
     display: none;
@@ -481,11 +481,11 @@ body {
   right: 0;
   z-index: 10;
   opacity: 0;
-  transition: opacity .2s .3s;
+  transition: opacity 0.2s 0.3s;
 }
 #widget-view.maximized:hover .titlebar {
   opacity: 1;
-  transition: opacity .2s;
+  transition: opacity 0.2s;
 }
 
 #widget-view.maximized .stats {
@@ -531,7 +531,7 @@ body {
   color: var(--muted);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .2s;
+  transition: opacity 0.2s;
   z-index: 2;
 }
 .chart-wrap:hover .refresh-hint {
@@ -554,7 +554,7 @@ body {
   border-radius: 100px;
   pointer-events: none;
   z-index: 100;
-  transition: opacity .3s;
+  transition: opacity 0.3s;
 }
 .copy-toast.hidden {
   opacity: 0;
@@ -584,7 +584,7 @@ body {
   cursor: pointer;
   padding: 0;
   font-size: clamp(12px, 3.2vw, 28px); /* inherit scale from parent */
-  transition: background .2s;
+  transition: background 0.2s;
 }
 
 .toggle-btn[aria-checked="true"] {
@@ -599,7 +599,7 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   background: #fff;
-  transition: left .2s;
+  transition: left 0.2s;
 }
 
 .toggle-btn[aria-checked="true"] .toggle-thumb {
@@ -636,7 +636,9 @@ body {
   background: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color .12s, background .12s;
+  transition:
+    color 0.12s,
+    background 0.12s;
 }
 .btn-icon:hover {
   color: var(--text);
@@ -682,7 +684,7 @@ body {
   cursor: text;
   -webkit-user-select: text;
   user-select: text;
-  transition: border-color .15s;
+  transition: border-color 0.15s;
 }
 .field input::placeholder {
   color: var(--muted);
@@ -708,7 +710,7 @@ body {
   font-size: clamp(12px, 3.2vw, 28px);
   font-weight: 500;
   padding: clamp(7px, 2vh, 18px) clamp(14px, 4.5vw, 40px);
-  transition: opacity .15s;
+  transition: opacity 0.15s;
 }
 .btn-save:hover {
   opacity: 0.85;

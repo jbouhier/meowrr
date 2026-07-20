@@ -1,8 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
@@ -15,12 +13,12 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUndeclaredVariables": "error"
       },
       "suspicious": {
-        "noConsoleLog": "off"
+        "noConsole": { "level": "off", "options": { "allow": ["log"] } }
       },
       "complexity": {
         "noForEach": "off"
@@ -30,11 +28,11 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
-      "semicolons": "always",
+      "semicolons": "asNeeded",
       "trailingCommas": "es5"
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "src-tauri/target", "src-tauri/gen"]
+    "includes": ["**", "!**/node_modules", "!**/dist", "!**/src-tauri/target", "!**/src-tauri/gen"]
   }
 }

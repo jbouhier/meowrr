@@ -1,8 +1,8 @@
-export const STRIPE_BALANCE_URL = "https://api.stripe.com/v1/balance";
+export const STRIPE_BALANCE_URL = "https://api.stripe.com/v1/balance"
 
 export interface StripeValidationResult {
-  ok: boolean;
-  error: string | null;
+  ok: boolean
+  error: string | null
 }
 
 export async function validateStripeKey(
@@ -10,24 +10,24 @@ export async function validateStripeKey(
   key: string | undefined
 ): Promise<StripeValidationResult> {
   if (!key || key.trim() === "") {
-    return { ok: false, error: "missing_key" };
+    return { ok: false, error: "missing_key" }
   }
 
   try {
     const res = await fetchImpl(STRIPE_BALANCE_URL, {
       headers: { Authorization: `Bearer ${key}` },
-    });
+    })
 
     if (res.ok) {
-      return { ok: true, error: null };
+      return { ok: true, error: null }
     }
 
     if (res.status === 401) {
-      return { ok: false, error: "invalid_key" };
+      return { ok: false, error: "invalid_key" }
     }
 
-    return { ok: false, error: `stripe_error_${res.status}` };
+    return { ok: false, error: `stripe_error_${res.status}` }
   } catch {
-    return { ok: false, error: "network_error" };
+    return { ok: false, error: "network_error" }
   }
 }
