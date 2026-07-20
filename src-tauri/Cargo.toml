@@ -1,6 +1,6 @@
 [package]
 name = "meowrr"
-version = "0.2.0"
+version = "0.3.0"
 description = "Track your MRR without distractions - Desktop app"
 authors = ["JB Bouhier"]
 edition = "2021"
