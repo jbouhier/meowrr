@@ -32,3 +32,6 @@ src-tauri/gen/schemas
 
 # Mobile
 gen/
+
+# local seed ledger (test-mode Stripe customer ids)
+.stripe-seed.json

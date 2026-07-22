@@ -88,6 +88,8 @@ You normally need to do this only once.
 
 <details>
 <summary><strong>Show build instructions</strong></summary>
+<p></p>
+<p></p>
 
 You do not need the source code to use MeowRR. Download the ready-to-use app above unless you specifically want to build it yourself.
 
@@ -123,6 +125,8 @@ bun run ci
 ```
 
 Test-only Stripe responses and revenue histories live in `tests/fixtures/` and are not included in the app.
+
+To check the app against a real Stripe account, see [Testing against Stripe](docs/testing-with-stripe.md). It covers seeding a test-mode account with subscriptions, since MeowRR reads `/v1/subscriptions` only and an empty account is indistinguishable from a broken poll.
 
 </details>
 

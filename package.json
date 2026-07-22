@@ -8,6 +8,7 @@
     "build": "vite build",
     "tauri": "tauri",
     "test": "bun test",
+    "seed": "bun run scripts/seed-stripe.ts",
     "check": "tsc --noEmit && bun run lint",
     "lint": "biome lint --error-on-warnings .",
     "format": "biome format --write .",
